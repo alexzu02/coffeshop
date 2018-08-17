@@ -123,7 +123,7 @@ appController.controller('EditUserCtrl',['$scope','$location','$routeParams','Ed
 	}
 ]);
 
-appController.controller('AddStoreCtrl',['$scope','$location','$routeParams','checkCreds','InfoUser','Store','LogOut',
+appController.controller('AddStoreCtrl',['$scope','$location','$routeParams','checkCreds','InfoUser','AddStore','LogOut',
 	function AddStoreCtrl($scope,$location,$routeParams,checkCreds,InfoUser,AddStore,LogOut){
 		if (checkCreds()) {
 			InfoUser.infoUser({},function success(response){
@@ -214,17 +214,156 @@ appController.controller('AddBranchCtrl',['$scope','$location','$routeParams','A
 
 appController.controller('ShowProductsCtrl',["$scope","$routeParams","GetInfoBranch",
 	function ShowProductsCtrl($scope,$routeParams,GetInfoBranch){
-		$scope.noProducts = true;
+		$scope.noProducts = false;
 
-		let idStore = $routeParams.idStore;
-		let idBranch = $routeParams.idBranch;
+		$scope.idStore = $routeParams.idStore;
+		$scope.idBranch = $routeParams.idBranch;
 		
-		GetInfoBranch.getInfoBranch({idStore:idStore,idBranch:idBranch},{},function success(response){
+		GetInfoBranch.getInfoBranch({idStore:$scope.idStore,idBranch:$scope.idBranch},{},function success(response){
 			$scope.nameBranch = response.branch.nameBranch;
+			if(response.branch.products.length==0){
+				$scope.noProducts = true;
+			}
 			$scope.products = response.branch.products;
+
+			
 		},function error(response){
 
 		});
 		
+	}
+])
+
+appController.controller('AddProductCtrl',["$scope","$routeParams","$location","AddProduct",
+	function AddProductCtrl($scope,$routeParams,$location,AddProduct){
+		$scope.addProduct = function(){
+			var nameProduct = $scope.nameProduct;
+			var priceProduct = $scope.priceProduct;
+			var descriptionProduct = $scope.descriptionProduct;
+			var idBranch = $routeParams.idBranch;
+			var idStore = $routeParams.idStore;
+
+			AddProduct.addProduct({idStore:idStore,idBranch:idBranch},
+									{nameProduct:nameProduct,priceProduct:priceProduct,
+									descriptionProduct,descriptionProduct},function success(response){
+										$location.path("store/"+idStore+"/branch/"+idBranch);
+									},function error(errorResponse){
+
+									})
+
+
+
+
+		};
+	}
+])
+
+appController.controller("DetailProduct",["$scope","$routeParams","GetProduct",
+	function DetailProduct($scope,$routeParams,GetProduct){
+		var idStore = $routeParams.idStore;
+		var idBranch = $routeParams.idBranch;
+		var idProduct = $routeParams.idProduct;
+		
+		GetProduct.getProduct({idStore,idBranch,idProduct},{},function success(response){
+			$scope.product = response.product;
+		},function error(errorResponse){
+			
+		});
+	}])
+
+appController.controller('ShopCtrl',["$scope","$cookies","GetStores","GetInfoStore","GetInfoBranch",
+	function ShopCtrl($scope,$cookies,GetStores,GetInfoStore,GetInfoBranch){
+		
+		
+		GetStores.getStores({},{},function success(response){
+			$scope.stores = response.stores;
+
+			$scope.selectStore = "-1";
+			$scope.selectBranch = "-1";
+		},function error(errorResponse){
+
+		})
+		$scope.hasBranch = false;
+		$scope.showBranches = function(){
+			if(!$scope.selectStore!="-1"){
+				GetInfoStore.getInfoStore({id:$scope.selectStore},{},function success(response){
+					$scope.branches = response.store.branches;
+					if(response.store.branches.length!=0){
+						$scope.hasBranch = true;
+					} else {
+						$scope.hasBranch = false;
+					}
+
+				},function error(errorResponse){
+	
+				})
+			}
+		}
+
+
+		$scope.hasProducts = false;
+		$scope.showProducts = function(){
+			if(!$scope.selectBranch != "-1"||$scope.selectBranch != "-2"){
+				GetInfoBranch.getInfoBranch({idStore:$scope.selectStore,idBranch:$scope.selectBranch},{},function success(response){
+					$scope.products = response.branch.products;
+					if($scope.products.length>0){
+						$scope.hasProducts = true;
+					} else {
+						$scope.hasProducts = false;	
+					}
+				},function error(errorResponse){
+
+				})
+			}
+		}
+
+		$scope.agregarCarrito = function(product){
+			console.log(product)
+			var carShopping = [];
+			if($cookies.getObject("carShopping")!=undefined){
+				carShopping = $cookies.getObject("carShopping");
+			}
+			carShopping.push(product)
+			$cookies.putObject("carShopping",carShopping);
+		}
+	}
+])
+
+appController.controller("CheckoutCtrl",["$scope","$cookies","$location","Shop",
+	function($scope,$cookies,$location,Shop){
+		$scope.items = $cookies.getObject("carShopping")
+		$scope.total = 0
+		if($scope.items != undefined){
+			
+			for (let i = 0; i < $scope.items.length; i++) {
+				$scope.total = $scope.total+$scope.items[i].priceProduct;
+			}
+
+			$scope.shop = function(){
+				Shop.shop({},{carShop:$scope.items},function success(response){
+					$cookies.remove("carShopping");
+					alert("Compra completada");
+					$location.path("/shop");
+				},function error(errorResponse){
+
+				})
+			}
+		} else {
+			$scope.items = [];
+		}
+		
+	}
+]);
+
+appController.controller("ViewShopCtrl",["$scope","GetShops",
+	function($scope,GetShops){
+		$scope.shops = [];
+		GetShops.getShops({},{},function success(response){
+			$scope.shops = response.shopping;
+			
+		},function error(responseError){
+
+		})
+
 	}
 ])

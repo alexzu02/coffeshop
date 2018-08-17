@@ -10,6 +10,14 @@ login_mean.config(['$routeProvider','$locationProvider',function($routeProvider,
 			templateUrl: 'partials/indexAdmin.html',
 			controller: 'IndexCtrl'
 		})
+		.when("/store/:idStore/branch/:idBranch/addProduct",{
+			templateUrl: "partials/addProduct.html",
+			controller: 'AddProductCtrl'
+		})
+		.when("/store/:idStore/branch/:idBranch/product/:idProduct",{
+			templateUrl: 'partials/detailProduct.html',
+			controller: 'DetailProduct'
+		})
 		.when("/addStore",{
 			templateUrl: 'partials/addStore.html',
 			controller: 'AddStoreCtrl'
@@ -41,6 +49,18 @@ login_mean.config(['$routeProvider','$locationProvider',function($routeProvider,
 		.when("/edit/:id",{
 			templateUrl: 'partials/editUser.html',
 			controller: 'EditUserCtrl'
+		})
+		.when("/shop",{
+			templateUrl: "partials/shop.html",
+			controller: "ShopCtrl"
+		})
+		.when("/checkout",{
+			templateUrl: "partials/checkout.html",
+			controller: "CheckoutCtrl"
+		})
+		.when("/viewShop",{
+			templateUrl: "partials/viewShop.html",
+			controller: "ViewShopCtrl"
 		})
 
 	$locationProvider.html5Mode(false).hashPrefix("!");

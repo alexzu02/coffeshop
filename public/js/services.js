@@ -79,3 +79,35 @@ appServices.factory("GetInfoBranch",["$resource",
 		})
 	}
 ])
+
+appServices.factory("AddProduct",['$resource',
+	function($resource){
+		return $resource('api/store/:idStore/branch/:idBranch/addProduct',{},{
+			addProduct: {method:'POST',cache:false,isArray:false}
+		})
+	}
+])
+
+appServices.factory("GetProduct",["$resource",
+	function($resource){
+		return $resource('api/store/:idStore/branch/:idBranch/product/:idProduct',{},{
+			getProduct: {method: 'GET',cache:false,isArray:false}
+		})
+	}
+]);
+
+appServices.factory("Shop",["$resource",
+	function($resource){
+		return $resource('api/user/shop',{},{
+			shop: {method: 'POST', cache:false, isArray:false}
+		})
+	}
+])
+
+appServices.factory("GetShops",["$resource",
+	function($resource){
+		return $resource('api/user/shop',{},{
+			getShops: {method: 'GET', cache:false, isArray:false}
+		})
+	}
+])
